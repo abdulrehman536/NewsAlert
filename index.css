@@ -1,0 +1,27 @@
+import React, { Component } from 'react'
+
+export class Newsitem extends Component {
+    render() {
+        let {title, description, source_url, image_url, creator, pubDate}=this.props;
+        return (
+            <div className='my-3'>
+                <div className="card" >
+                    <div>
+                    <span className="badge rounded-pill bg-danger" style={{display: 'flex', position: 'absolute', justifyContent: 'flex-end', right: '0'}}>
+                            {creator}
+                         </span>
+                    </div>
+                    <img src={image_url ? image_url : "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSwa3Jlv3B32CzD9--jL7R0fkoYChXnl0W8CA&s"} className="card-img-top" alt="..." />
+                    <div className="card-body">
+                        <h5 className="card-title">{title}</h5>
+                        <p className="card-text">{description}</p>
+                        <p className="card-text"><small className="text-body-secondary">By {creator ? creator : "Unknown"} on {new Date(pubDate).toGMTString()}</small></p>
+                        <a rel='noreferer' href={source_url} target='_blank' className="btn btn-primary">Read More</a>
+                    </div>
+                </div>
+            </div>
+        )
+    }
+}
+
+export default Newsitem

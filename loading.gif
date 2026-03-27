@@ -1,0 +1,82 @@
+import React, { Component } from 'react'
+import Newsitem from './Newsitem';
+import PropTypes from 'prop-types';
+import InfiniteScroll from 'react-infinite-scroll-component';
+import Spinner from './Spinner';
+
+export class News extends Component {
+    static defaultProps = {
+        country: 'us',
+        pageSize: 8,
+        category: 'general'
+    }
+    
+    static propTypes={
+        country: PropTypes.string,
+        pageSize: PropTypes.number,
+        category: PropTypes.string
+    }
+
+    constructor(props){
+        super(props);
+        this.state={
+            articles: [],
+            page: 1,
+            loading: true,
+            totalResults: 0
+        }
+        document.title=`${props.category.charAt(0).toUpperCase() + props.category.slice(1) + ' - NewsAlert'}`
+    }
+
+    async updateNews(){
+        this.props.setProgress(10);
+        const url = `https://api.thenewsapi.com/v1/news/top?api_token=x1fkroDnvPkD91mC9jPzfsjzXxYLurV69jMU3iPq&language=en&categories=${this.props.category}&page=${this.state.page}`;
+        this.setState({loading :true});
+        this.props.setProgress(30);
+        let data=await fetch(url);
+        let parsedData=await data.json();
+        this.props.setProgress(70);
+        this.setState({articles: parsedData.data, totalResults: parsedData.found, loading: false});
+        this.props.setProgress(100);
+    }
+
+    async componentDidMount(){
+        this.updateNews();
+    }
+
+    fetchMoreData=async ()=> {
+        this.setState({page: this.state.page+1});
+        const url = `https://api.thenewsapi.com/v1/news/top?api_token=x1fkroDnvPkD91mC9jPzfsjzXxYLurV69jMU3iPq&language=en&categories=${this.props.category}&page=${this.state.page+1}`;
+        this.setState({loading :true});
+        let data=await fetch(url);
+        let parsedData=await data.json();
+        this.setState({articles: this.state.articles.concat(parsedData.data), totalResults: parsedData.found});
+    }
+
+  render() {
+    return (
+      <>
+        <h1 style={{textAlign: 'center', margin: '35px 0px'}}>NewsAlert - Top {this.props.category.charAt(0).toUpperCase() + this.props.category.slice(1)} Highlights</h1>
+        <InfiniteScroll
+    dataLength={this.state.articles.length}
+    next={this.fetchMoreData}
+    hasMore={true}
+    loader={<Spinner/>}
+  >
+   <div className='container'>
+            <div className='row'>
+                { this.state.articles.map((element) =>{
+                    return <div className='col-md-4' key={element.url}>
+                            <Newsitem title={element.title} description={element.description} image_url={element.image_url} source_url={element.url} creator={element.source} pubDate={element.published_at} language={element.language} />
+                    </div>
+                }) }
+            </div>
+        </div>
+  </InfiniteScroll>
+   
+      </>
+    )
+  }
+}
+
+export default News
